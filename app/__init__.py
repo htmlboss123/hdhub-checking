@@ -1,19 +1,21 @@
+# app/__init__.py
 """
-Telegram Media Bot - Package Initialization
-A complete solution for indexing and serving media files from Telegram channels
+Telegram Media Bot - Application Package
 """
-
-__version__ = "1.0.0"
-__author__ = "Your Name"
-
-from app.config import Config
-from app.database import db
-from app.models import MediaFile, User, DownloadRequest
+from . import bot
+from . import config
+from . import database
+from . import models
+from . import utils
+from . import admin_handlers
+from . import api
 
 __all__ = [
-    'Config',
-    'db',
-    'MediaFile',
-    'User',
-    'DownloadRequest',
+    'bot',
+    'config', 
+    'database',
+    'models',
+    'utils',
+    'admin_handlers',
+    'api'
 ]
