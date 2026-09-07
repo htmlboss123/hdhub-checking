@@ -1,65 +1,93 @@
 #!/usr/bin/env python3
 """
-Main entry point for both API and Bot
-This structure ensures proper build and run on Koyeb
+Telegram Media Bot - Main Entry Point
+This file is the single entry point for both API and Bot
 """
 
 import os
 import sys
 import logging
 import asyncio
-import threading
-from dotenv import load_dotenv
+from datetime import datetime
 
-# Load environment variables
-load_dotenv()
-
-# Setup logging
+# Configure logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Import after logging setup
-try:
-    from app.api import app as api_app
-    from app.bot import main as bot_main
-except ImportError as e:
-    logger.error(f"Import error: {e}")
-    # Try alternative import
+# FastAPI imports
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+# Create FastAPI app
+app = FastAPI(
+    title="Telegram Media Bot API",
+    description="API for serving Telegram media files",
+    version="1.0.0"
+)
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Health check endpoint
+@app.get("/")
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Koyeb"""
+    return {
+        "status": "healthy",
+        "service": "Telegram Media Bot",
+        "version": "1.0.0",
+        "timestamp": datetime.utcnow().isoformat(),
+        "python_version": sys.version
+    }
+
+@app.get("/api/v1/status")
+async def api_status():
+    """API status endpoint"""
+    return {
+        "status": "running",
+        "message": "API is operational",
+        "endpoints": [
+            "/",
+            "/health",
+            "/api/v1/status"
+        ]
+    }
+
+# Import bot only when needed (lazy import)
+def get_bot_application():
+    """Lazy import bot to avoid startup issues"""
     try:
-        from app.api import app as api_app
         from app.bot import main as bot_main
-    except ImportError:
-        # Create minimal app for health check
-        from fastapi import FastAPI
-        api_app = FastAPI()
-        
-        @api_app.get("/")
-        async def root():
-            return {"status": "ok", "message": "Telegram Media Bot"}
-        
-        @api_app.get("/health")
-        async def health():
-            return {"status": "healthy"}
-
-# Global application for Koyeb
-app = api_app
-
-def run_bot():
-    """Run the bot in a separate thread"""
-    try:
-        logger.info("Starting Telegram Bot...")
-        asyncio.run(bot_main())
+        return bot_main
     except Exception as e:
-        logger.error(f"Bot error: {e}")
+        logger.error(f"Failed to import bot: {e}")
+        return None
 
-def run_api():
-    """Run the API"""
+# Run bot in background if needed
+async def start_bot():
+    """Start the Telegram bot in background"""
+    try:
+        from app.bot import main as bot_main
+        logger.info("Starting Telegram Bot...")
+        await bot_main()
+    except Exception as e:
+        logger.error(f"Bot failed to start: {e}")
+
+# For uvicorn
+if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv('PORT', 8000))
-    logger.info(f"Starting API on port {port}...")
+    port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
@@ -67,20 +95,3 @@ def run_api():
         reload=False,
         log_level="info"
     )
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["api", "bot", "both"], default="api")
-    args = parser.parse_args()
-    
-    if args.mode == "bot":
-        asyncio.run(bot_main())
-    elif args.mode == "api":
-        run_api()
-    else:  # both
-        # Run both in threads
-        bot_thread = threading.Thread(target=run_bot)
-        bot_thread.daemon = True
-        bot_thread.start()
-        run_api()
