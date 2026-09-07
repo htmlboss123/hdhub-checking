@@ -68,8 +68,13 @@ async def api_status():
 def get_bot_application():
     """Lazy import bot to avoid startup issues"""
     try:
+        # Check if app is a package
+        import app
         from app.bot import main as bot_main
         return bot_main
+    except ImportError as e:
+        logger.warning(f"Bot module not available: {e}")
+        return None
     except Exception as e:
         logger.error(f"Failed to import bot: {e}")
         return None
