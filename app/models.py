@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class MediaFile(BaseModel):
     file_id: str
@@ -21,10 +21,9 @@ class MediaFile(BaseModel):
     download_count: int = 0
     watch_count: int = 0
     is_active: bool = True
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = datetime.utcnow()
+    updated_at: datetime = datetime.utcnow()
     tags: List[str] = []
-    categories: List[str] = []
 
 class User(BaseModel):
     user_id: int
@@ -34,14 +33,5 @@ class User(BaseModel):
     is_admin: bool = False
     download_count: int = 0
     watch_count: int = 0
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_active: datetime = Field(default_factory=datetime.utcnow)
-
-class DownloadRequest(BaseModel):
-    file_id: str
-    user_id: int
-    ip_address: Optional[str]
-    requested_at: datetime = Field(default_factory=datetime.utcnow)
-    status: str = "pending"  # pending, processing, completed, failed
-    download_url: Optional[str] = None
-    expires_at: Optional[datetime] = None
+    created_at: datetime = datetime.utcnow()
+    last_active: datetime = datetime.utcnow()
