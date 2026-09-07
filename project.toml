@@ -1,0 +1,27 @@
+[project]
+name = "telegram-media-bot"
+version = "1.0.0"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry]
+name = "telegram-media-bot"
+version = "1.0.0"
+description = "Telegram Media Bot with API"
+authors = ["Your Name <email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.0"
+uvicorn = "^0.27.0"
+python-telegram-bot = "^20.7"
+pymongo = "^4.6.0"
+python-dotenv = "^1.0.0"
+aiohttp = "^3.9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
