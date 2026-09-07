@@ -1,4 +1,5 @@
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +19,7 @@ class Config:
     ADMIN_IDS = [int(id.strip()) for id in admin_ids.split(',') if id.strip()]
     
     # API Settings
-    API_SECRET = os.getenv('API_SECRET', 'default-secret-key')
+    API_SECRET = os.getenv('API_SECRET', 'default-secret-key-change-me')
     API_PORT = int(os.getenv('API_PORT', 8000))
     
     # Bot Settings
@@ -26,10 +27,28 @@ class Config:
     SCAN_INTERVAL = int(os.getenv('SCAN_INTERVAL', 3600))
     
     # Supported formats
-    VIDEO_FORMATS = ['.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm']
-    SUBTITLE_FORMATS = ['.srt', '.ass', '.vtt']
-    AUDIO_FORMATS = ['.mp3', '.aac', '.flac', '.wav']
+    VIDEO_FORMATS = ['.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.3gp']
+    SUBTITLE_FORMATS = ['.srt', '.ass', '.vtt', '.sub', '.ssa']
+    AUDIO_FORMATS = ['.mp3', '.aac', '.flac', '.wav', '.m4a', '.ogg']
+    
+    # Logging
+    LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+    LOG_FILE = os.getenv('LOG_FILE', 'bot.log')
+    
+    # Base URL for API
+    BASE_URL = os.getenv('BASE_URL', 'https://your-domain.com')
 
 # Validate critical config
 if not Config.BOT_TOKEN:
-    print("⚠️ Warning: BOT_TOKEN not set. Bot will not function.")
+    print("⚠️ WARNING: BOT_TOKEN not set! Bot will not function.")
+
+# Setup logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=getattr(logging, Config.LOG_LEVEL),
+    handlers=[
+        logging.FileHandler(Config.LOG_FILE),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
