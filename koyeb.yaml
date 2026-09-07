@@ -1,33 +1,8 @@
-# Koyeb deployment configuration
-name: telegram-media-bot
-region: fra
-instance_type: nano
-scaling:
-  min: 1
-  max: 1
-
-services:
-  - name: api
-    instance_type: nano
-    ports:
-      - port: 8000
-        protocol: http
-    env:
-      - key: BOT_TOKEN
-        value: ${BOT_TOKEN}
-      - key: API_ID
-        value: ${API_ID}
-      - key: API_HASH
-        value: ${API_HASH}
-      - key: MONGO_URI
-        value: ${MONGO_URI}
-      - key: ADMIN_IDS
-        value: ${ADMIN_IDS}
-      - key: API_SECRET
-        value: ${API_SECRET}
-    health_check:
-      http:
-        path: /health
-        port: 8000
-        initial_delay: 10
-        interval: 30
+---
+python:
+  version: 3.11.8
+  pip:
+    requirements: requirements.txt
+  env:
+    - PYTHONUNBUFFERED=1
+    - PYTHONDONTWRITEBYTECODE=1
