@@ -1,20 +1,13 @@
-# Core
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+pydantic==2.6.1
 python-telegram-bot==20.7
 pymongo==4.6.1
 python-dotenv==1.0.1
-
-# API
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
 python-multipart==0.0.9
-aiofiles==23.2.1
-
-# Async
 aiohttp==3.9.3
-asyncio==3.4.3
-
-# Utilities
-cryptography==42.0.2
+aiofiles==23.2.1
+cryptography==42.0.5
 python-dateutil==2.8.2
 pytz==2024.1
+email-validator==2.1.1
