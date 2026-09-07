@@ -14,10 +14,11 @@ class Config:
     DB_NAME = os.getenv('DB_NAME', 'telegram_media')
     
     # Admin Settings
-    ADMIN_IDS = [int(id.strip()) for id in os.getenv('ADMIN_IDS', '').split(',') if id.strip()]
+    admin_ids = os.getenv('ADMIN_IDS', '')
+    ADMIN_IDS = [int(id.strip()) for id in admin_ids.split(',') if id.strip()]
     
     # API Settings
-    API_SECRET = os.getenv('API_SECRET', 'default-secret-key-change-me')
+    API_SECRET = os.getenv('API_SECRET', 'default-secret-key')
     API_PORT = int(os.getenv('API_PORT', 8000))
     
     # Bot Settings
@@ -29,6 +30,6 @@ class Config:
     SUBTITLE_FORMATS = ['.srt', '.ass', '.vtt']
     AUDIO_FORMATS = ['.mp3', '.aac', '.flac', '.wav']
 
-# Validate required config
+# Validate critical config
 if not Config.BOT_TOKEN:
-    raise ValueError("BOT_TOKEN is required!")
+    print("⚠️ Warning: BOT_TOKEN not set. Bot will not function.")
