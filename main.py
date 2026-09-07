@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Telegram Media Bot - Main Entry Point
-This file is the single entry point for both API and Bot
+Main Entry Point for Telegram Media Bot
 """
 
 import os
@@ -17,16 +16,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# FastAPI imports
-from fastapi import FastAPI, HTTPException
+# FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 # Create FastAPI app
 app = FastAPI(
     title="Telegram Media Bot API",
-    description="API for serving Telegram media files",
-    version="1.0.0"
+    description="Complete API for Telegram media files",
+    version="2.0.0"
 )
 
 # Enable CORS
@@ -38,60 +36,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health check endpoint
+# Import API routes
+try:
+    from app.api import app as api_app
+    # Merge routes
+    app.router.routes.extend(api_app.router.routes)
+except Exception as e:
+    logger.error(f"Failed to import API: {e}")
+
+# Health check
 @app.get("/")
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for Koyeb"""
     return {
         "status": "healthy",
         "service": "Telegram Media Bot",
-        "version": "1.0.0",
-        "timestamp": datetime.utcnow().isoformat(),
-        "python_version": sys.version
+        "version": "2.0.0",
+        "timestamp": datetime.utcnow().isoformat()
     }
 
-@app.get("/api/v1/status")
-async def api_status():
-    """API status endpoint"""
-    return {
-        "status": "running",
-        "message": "API is operational",
-        "endpoints": [
-            "/",
-            "/health",
-            "/api/v1/status"
-        ]
-    }
-
-# Import bot only when needed (lazy import)
-def get_bot_application():
-    """Lazy import bot to avoid startup issues"""
-    try:
-        # Check if app is a package
-        import app
-        from app.bot import main as bot_main
-        return bot_main
-    except ImportError as e:
-        logger.warning(f"Bot module not available: {e}")
-        return None
-    except Exception as e:
-        logger.error(f"Failed to import bot: {e}")
-        return None
-
-# Run bot in background if needed
-async def start_bot():
-    """Start the Telegram bot in background"""
+# Run bot
+async def run_bot():
     try:
         from app.bot import main as bot_main
-        logger.info("Starting Telegram Bot...")
         await bot_main()
     except Exception as e:
-        logger.error(f"Bot failed to start: {e}")
+        logger.error(f"Bot error: {e}")
 
-# For uvicorn
 if __name__ == "__main__":
     import uvicorn
+    
+    # Start bot in background
+    if os.getenv("RUN_BOT", "true").lower() == "true":
+        import threading
+        thread = threading.Thread(target=lambda: asyncio.run(run_bot()))
+        thread.daemon = True
+        thread.start()
+        logger.info("Bot started in background thread")
+    
+    # Start API
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app",
